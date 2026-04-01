@@ -1,0 +1,106 @@
+<!-- tests/test-runner.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ryan's Rotas — Tests</title>
+  <style>
+    body { font-family: monospace; padding: 1rem; background: #1a1a2e; color: #e2e8f0; }
+    .pass { color: #22c55e; }
+    .fail { color: #ef4444; }
+    .suite { margin: 1rem 0; padding: 0.5rem; border-left: 3px solid #334155; }
+    .suite-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem; }
+    #summary { margin-top: 2rem; font-size: 1.2rem; padding: 1rem; border-radius: 8px; }
+    #summary.all-pass { background: #052e16; border: 1px solid #22c55e; }
+    #summary.has-fail { background: #450a0a; border: 1px solid #ef4444; }
+  </style>
+</head>
+<body>
+  <h1>Ryan's Rotas — Test Runner</h1>
+  <div id="results"></div>
+  <div id="summary"></div>
+
+  <script>
+    window.testResults = { passed: 0, failed: 0, suites: [] };
+    window.currentSuite = null;
+
+    window.describe = function(name, fn) {
+      window.currentSuite = { name, tests: [] };
+      window.testResults.suites.push(window.currentSuite);
+      fn();
+      window.currentSuite = null;
+    };
+
+    window.it = function(name, fn) {
+      try {
+        fn();
+        window.currentSuite.tests.push({ name, passed: true });
+        window.testResults.passed++;
+      } catch (e) {
+        window.currentSuite.tests.push({ name, passed: false, error: e.message });
+        window.testResults.failed++;
+      }
+    };
+
+    window.assert = {
+      equal(a, b) {
+        if (a !== b) throw new Error(`Expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
+      },
+      deepEqual(a, b) {
+        if (JSON.stringify(a) !== JSON.stringify(b))
+          throw new Error(`Expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`);
+      },
+      ok(val) {
+        if (!val) throw new Error(`Expected truthy, got ${JSON.stringify(val)}`);
+      },
+      notOk(val) {
+        if (val) throw new Error(`Expected falsy, got ${JSON.stringify(val)}`);
+      },
+      throws(fn) {
+        let threw = false;
+        try { fn(); } catch (e) { threw = true; }
+        if (!threw) throw new Error('Expected function to throw');
+      }
+    };
+
+    window.renderResults = function() {
+      const el = document.getElementById('results');
+      let html = '';
+      for (const suite of window.testResults.suites) {
+        html += `<div class="suite"><div class="suite-title">${suite.name}</div>`;
+        for (const t of suite.tests) {
+          if (t.passed) {
+            html += `<div class="pass">✓ ${t.name}</div>`;
+          } else {
+            html += `<div class="fail">✗ ${t.name} — ${t.error}</div>`;
+          }
+        }
+        html += '</div>';
+      }
+      el.innerHTML = html;
+
+      const sum = document.getElementById('summary');
+      const total = window.testResults.passed + window.testResults.failed;
+      if (window.testResults.failed === 0) {
+        sum.className = 'all-pass';
+        sum.textContent = `All ${total} tests passed`;
+      } else {
+        sum.className = 'has-fail';
+        sum.textContent = `${window.testResults.failed} of ${total} tests failed`;
+      }
+    };
+  </script>
+
+  <script type="module">
+    // Tests will be added as modules in later tasks
+    // For now, run a smoke test
+    describe('Test Runner', () => {
+      it('works', () => {
+        assert.equal(1 + 1, 2);
+      });
+    });
+
+    renderResults();
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ryan's Rotas</title>
+  <link rel="stylesheet" href="src/css/styles.css">
+</head>
+<body>
+  <nav class="nav-tabs" id="nav">
+    <button class="nav-tab active" data-screen="yearPlanner">
+      <span class="nav-tab-icon">📅</span>Year
+    </button>
+    <button class="nav-tab" data-screen="monthlyRota">
+      <span class="nav-tab-icon">📋</span>Rota
+    </button>
+    <button class="nav-tab" data-screen="hours">
+      <span class="nav-tab-icon">📊</span>Hours
+    </button>
+    <button class="nav-tab" data-screen="workers">
+      <span class="nav-tab-icon">👥</span>Workers
+    </button>
+    <button class="nav-tab" data-screen="settings">
+      <span class="nav-tab-icon">⚙️</span>More
+    </button>
+  </nav>
+
+  <div id="screen-yearPlanner" class="screen active"></div>
+  <div id="screen-monthlyRota" class="screen"></div>
+  <div id="screen-hours" class="screen"></div>
+  <div id="screen-workers" class="screen"></div>
+  <div id="screen-settings" class="screen"></div>
+
+  <div id="modal-root"></div>
+
+  <script type="module" src="src/js/app.js"></script>
+</body>
+</html>
