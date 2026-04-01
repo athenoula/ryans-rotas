@@ -1,1 +1,252 @@
-export function renderMonthlyRota(container) { container.innerHTML = '<h2>Monthly Rota</h2><p>Coming soon</p>'; }
+// src/js/monthlyRota.js
+import { getYearCalendar, getRota, saveRota, getWorkers, getWorkerById } from './data.js';
+import { getShiftsForMode, calculateHours } from './shiftTemplates.js';
+import { showModal, closeModal } from './app.js';
+
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+
+export function renderMonthlyRota(container) {
+  const monthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+  const cal = getYearCalendar(currentYear);
+  const rota = getRota(monthStr);
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const monthName = new Date(currentYear, currentMonth, 1).toLocaleString('en-GB', { month: 'long' });
+
+  let homeDays = 0, awayDays = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const mode = cal.days[dateStr];
+    if (mode === 'home') homeDays++;
+    else if (mode === 'away') awayDays++;
+  }
+
+  container.innerHTML = `
+    <div class="header">
+      <button class="btn btn-ghost" id="prev-month">←</button>
+      <div style="text-align: center;">
+        <h1>${monthName} ${currentYear}</h1>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">${homeDays} Home · ${awayDays} Away</div>
+      </div>
+      <button class="btn btn-ghost" id="next-month">→</button>
+    </div>
+    <div style="padding: 0.5rem 0.5rem 0; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <button class="btn btn-success" id="auto-fill-btn">⚡ Auto-Fill</button>
+      <button class="btn btn-ghost" id="pre-populate-btn">📝 Availability</button>
+      <button class="btn btn-ghost" id="clear-rota-btn" style="color: var(--red);">Clear</button>
+    </div>
+    <div style="overflow-x: auto; padding: 0.5rem;">
+      <table class="rota-table" id="rota-table">
+        <thead>
+          <tr>
+            <th style="min-width: 70px;">Date</th>
+            <th>Short / Day</th>
+            <th>Long / Day</th>
+            <th>Waking / Sleep</th>
+            <th>Waking / Sleep</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${renderRotaDays(daysInMonth, cal, rota, monthStr)}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  addRotaStyles();
+
+  container.querySelector('#prev-month').addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderMonthlyRota(container);
+  });
+  container.querySelector('#next-month').addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderMonthlyRota(container);
+  });
+  container.querySelector('#auto-fill-btn').addEventListener('click', async () => {
+    const { runAutoFill } = await import('./autoFill.js');
+    runAutoFill(monthStr);
+    renderMonthlyRota(container);
+  });
+  container.querySelector('#pre-populate-btn').addEventListener('click', async () => {
+    const { renderPrePopulate } = await import('./prePopulate.js');
+    renderPrePopulate(monthStr);
+  });
+  container.querySelector('#clear-rota-btn').addEventListener('click', () => {
+    if (confirm('Clear all shifts for this month?')) {
+      saveRota({ month: monthStr, days: [], version: 'V1', status: 'draft' });
+      renderMonthlyRota(container);
+    }
+  });
+
+  container.querySelector('#rota-table').addEventListener('click', (e) => {
+    const cell = e.target.closest('.shift-cell[data-date][data-slot]');
+    if (!cell) return;
+    openAssignModal(cell.dataset.date, Number(cell.dataset.slot), monthStr, container);
+  });
+}
+
+function renderRotaDays(daysInMonth, cal, rota, monthStr) {
+  let html = '';
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${monthStr}-${String(d).padStart(2, '0')}`;
+    const mode = cal.days[dateStr] || null;
+    const dow = dayNames[new Date(currentYear, currentMonth, d).getDay()];
+    const dayPlan = rota?.days?.find(dp => dp.date === dateStr);
+
+    const rowClass = mode === 'home' ? 'row-home' : mode === 'away' ? 'row-away' : 'row-unset';
+    const badgeClass = mode === 'home' ? 'badge-home' : mode === 'away' ? 'badge-away' : '';
+
+    html += `<tr class="${rowClass}">`;
+    html += `<td class="date-cell"><strong>${d}</strong> ${dow}`;
+    if (mode) html += `<br><span class="badge ${badgeClass}">${mode.toUpperCase()}</span>`;
+    html += `</td>`;
+
+    if (!mode) {
+      html += `<td colspan="4" style="text-align: center; color: var(--text-dim); font-size: 0.8rem;">Not set — mark Home or Away in Year Planner</td>`;
+    } else {
+      const templates = getShiftsForMode(mode);
+      for (let s = 0; s < 4; s++) {
+        const shift = dayPlan?.shifts?.[s];
+        const tmpl = templates[s];
+        const startTime = shift?.startTime || tmpl.startTime;
+        const endTime = shift?.endTime || tmpl.endTime;
+        const worker = shift?.assignedWorker ? getWorkerById(shift.assignedWorker) : null;
+        const workerName = worker ? worker.name : 'TO COVER';
+        const isCover = !worker;
+
+        html += `<td class="shift-cell" data-date="${dateStr}" data-slot="${s}">
+          <div class="shift-card ${isCover ? 'shift-cover' : ''}">
+            <div class="shift-time">${startTime}–${endTime}</div>
+            <div class="shift-worker ${isCover ? 'cover' : ''}">${workerName}</div>
+          </div>
+        </td>`;
+      }
+    }
+    html += `</tr>`;
+  }
+  return html;
+}
+
+function openAssignModal(dateStr, slotIndex, monthStr, container) {
+  const rota = getRota(monthStr) || { month: monthStr, days: [], version: 'V1', status: 'draft' };
+  const cal = getYearCalendar(currentYear);
+  const mode = cal.days[dateStr];
+  if (!mode) return;
+
+  const templates = getShiftsForMode(mode);
+  const tmpl = templates[slotIndex];
+  const dayPlan = rota.days.find(dp => dp.date === dateStr);
+  const shift = dayPlan?.shifts?.[slotIndex];
+
+  const workers = getWorkers().filter(w =>
+    w.allowedShiftTypes.includes(tmpl.type) || w.team === 'bank' || w.team === 'adhoc'
+  );
+
+  const currentStart = shift?.startTime || tmpl.startTime;
+  const currentEnd = shift?.endTime || tmpl.endTime;
+  const currentWorker = shift?.assignedWorker || '';
+
+  showModal(`
+    <h2>Assign ${tmpl.label}</h2>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">${dateStr}</p>
+    <form id="assign-form">
+      <div class="form-group">
+        <label>Worker</label>
+        <select name="worker">
+          <option value="">TO COVER</option>
+          ${workers.map(w => `<option value="${w.id}" ${w.id === currentWorker ? 'selected' : ''}>${w.name} (${w.team})</option>`).join('')}
+        </select>
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <div class="form-group" style="flex:1;">
+          <label>Start Time</label>
+          <input type="time" name="startTime" value="${currentStart}">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>End Time</label>
+          <input type="time" name="endTime" value="${currentEnd}">
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem;">
+        <button type="button" class="btn btn-ghost" id="cancel-assign">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  `);
+
+  document.getElementById('cancel-assign').addEventListener('click', closeModal);
+  document.getElementById('assign-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const workerId = form.worker.value || null;
+    const startTime = form.startTime.value;
+    const endTime = form.endTime.value;
+    const hours = calculateHours(startTime, endTime);
+
+    let dp = rota.days.find(d => d.date === dateStr);
+    if (!dp) {
+      dp = { date: dateStr, mode, shifts: templates.map((t, i) => ({
+        slotIndex: i, shiftType: t.type, startTime: t.startTime, endTime: t.endTime,
+        hours: t.hours, assignedWorker: null,
+      }))};
+      rota.days.push(dp);
+    }
+
+    dp.shifts[slotIndex] = {
+      slotIndex,
+      shiftType: tmpl.type,
+      startTime,
+      endTime,
+      hours,
+      assignedWorker: workerId,
+    };
+
+    saveRota(rota);
+    closeModal();
+    renderMonthlyRota(container);
+  });
+}
+
+function addRotaStyles() {
+  if (document.getElementById('rota-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'rota-styles';
+  style.textContent = `
+    .rota-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    .rota-table th {
+      padding: 0.5rem;
+      text-align: center;
+      background: var(--bg-card);
+      border-bottom: 2px solid var(--border);
+      font-size: 0.8rem;
+      position: sticky;
+      top: 0;
+    }
+    .rota-table td { padding: 0.3rem; }
+    .date-cell { font-size: 0.8rem; white-space: nowrap; padding: 0.5rem !important; }
+    .row-home { background: var(--bg-home); }
+    .row-away { background: var(--bg-away); }
+    .row-unset { background: var(--bg); }
+    .rota-table tr { border-bottom: 1px solid #1a1a2e; }
+    .shift-cell { cursor: pointer; }
+    .shift-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem;
+      text-align: center;
+      min-width: 100px;
+    }
+    .shift-card:hover { border-color: var(--blue); }
+    .shift-time { color: var(--text-muted); font-size: 0.7rem; }
+    .shift-worker { font-size: 0.8rem; }
+    .shift-worker.cover { color: var(--red); font-weight: bold; }
+    .shift-cover { border-color: #5c1a1a; }
+  `;
+  document.head.appendChild(style);
+}
