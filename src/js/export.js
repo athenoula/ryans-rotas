@@ -103,6 +103,7 @@ function generateExcel(monthStr) {
       ]);
       isFirstShift = false;
     }
+    rows.push([]); // blank row between days
   }
 
   rows.push([]);
