@@ -1,3 +1,5 @@
+import { PRELOAD_CALENDARS, PRELOAD_ROTAS } from './preloadData.js';
+
 const STORAGE_KEY = 'ryansRotas';
 
 const DEFAULT_WORKERS = [
@@ -19,7 +21,13 @@ function load() {
   if (raw) {
     data = JSON.parse(raw);
   } else {
-    data = { workers: structuredClone(DEFAULT_WORKERS), calendars: {}, rotas: {}, availability: {} };
+    data = {
+      workers: structuredClone(DEFAULT_WORKERS),
+      calendars: structuredClone(PRELOAD_CALENDARS),
+      rotas: structuredClone(PRELOAD_ROTAS),
+      availability: {}
+    };
+    save();
   }
 }
 
