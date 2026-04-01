@@ -92,14 +92,8 @@
   </script>
 
   <script type="module">
-    // Tests will be added as modules in later tasks
-    // For now, run a smoke test
-    describe('Test Runner', () => {
-      it('works', () => {
-        assert.equal(1 + 1, 2);
-      });
-    });
-
+    import '../tests/shiftTemplates.test.js';
+    import '../tests/data.test.js';
     renderResults();
   </script>
 </body>
