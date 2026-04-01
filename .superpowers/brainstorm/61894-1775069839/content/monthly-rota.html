@@ -1,0 +1,177 @@
+<h2>Monthly Rota View</h2>
+<p class="subtitle">The main screen where Ryan builds and manages the rota</p>
+
+<div class="mockup">
+  <div class="mockup-header">Monthly Rota — April 2026</div>
+  <div class="mockup-body" style="padding: 0; font-family: system-ui; font-size: 0.8rem; overflow-x: auto;">
+
+    <!-- Month selector bar -->
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: #1a1a2e; border-bottom: 1px solid #333;">
+      <button style="background: #333; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer;">← Mar</button>
+      <div style="text-align: center;">
+        <strong style="font-size: 1.1rem;">April 2026</strong>
+        <div style="color: #888; font-size: 0.75rem;">18 Home days · 12 Away days</div>
+      </div>
+      <button style="background: #333; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer;">May →</button>
+    </div>
+
+    <!-- Auto-fill button -->
+    <div style="padding: 0.75rem 1rem; background: #0d2137; border-bottom: 1px solid #333; display: flex; gap: 0.5rem; align-items: center;">
+      <button style="background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold;">⚡ Auto-Fill Shifts</button>
+      <span style="color: #888; font-size: 0.75rem;">Generates shifts from Year Planner · assigns workers by team · respects contracted hours</span>
+    </div>
+
+    <!-- Rota table -->
+    <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+      <thead>
+        <tr style="background: #1e293b;">
+          <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #444; width: 60px;">Date</th>
+          <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #444; width: 50px;">Mode</th>
+          <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #444;">Shift 1</th>
+          <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #444;">Shift 2</th>
+          <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #444;">Shift 3</th>
+          <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #444;">Shift 4</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Home day -->
+        <tr style="background: #0a1628; border-bottom: 1px solid #222;">
+          <td style="padding: 0.5rem; font-weight: bold;">1 Tue</td>
+          <td style="padding: 0.5rem;"><span style="background: #1e40af; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">HOME</span></td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a2744; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Short Day · 09-18</div>
+              <div style="color: #ef4444; font-weight: bold;">TO COVER</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a2744; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Long Day · 09-21</div>
+              <div style="color: #e2e8f0;">Karen Hughes</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1a3a; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Waking Night · 21-09</div>
+              <div style="color: #e2e8f0;">Alayo Obafemi</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1a3a; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Waking Night · 21-09</div>
+              <div style="color: #e2e8f0;">Ankita</div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Another home day -->
+        <tr style="background: #0d1b30; border-bottom: 1px solid #222;">
+          <td style="padding: 0.5rem; font-weight: bold;">2 Wed</td>
+          <td style="padding: 0.5rem;"><span style="background: #1e40af; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">HOME</span></td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a2744; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Short Day · 09-18</div>
+              <div style="color: #e2e8f0;">Karen Hughes</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a2744; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Long Day · 09-21</div>
+              <div style="color: #e2e8f0;">Paige</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1a3a; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Waking Night · 21-09</div>
+              <div style="color: #ef4444; font-weight: bold;">TO COVER</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1a3a; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Waking Night · 21-09</div>
+              <div style="color: #e2e8f0;">Ankita</div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Ellipsis -->
+        <tr style="background: #0a1628; border-bottom: 1px solid #222;">
+          <td colspan="6" style="padding: 0.4rem; text-align: center; color: #555;">⋯ days 3-7 ⋯</td>
+        </tr>
+
+        <!-- Away day -->
+        <tr style="background: #1a0d06; border-bottom: 1px solid #222;">
+          <td style="padding: 0.5rem; font-weight: bold;">8 Tue</td>
+          <td style="padding: 0.5rem;"><span style="background: #b45309; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">AWAY</span></td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #2a1a0a; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Day · 09-23</div>
+              <div style="color: #e2e8f0;">Andrew Cockbill</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #2a1a0a; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Day · 09-23</div>
+              <div style="color: #e2e8f0;">Kapil Kumar Kumar</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1508; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Sleep Night · 23-09</div>
+              <div style="color: #e2e8f0;">Andrew Cockbill</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1508; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Sleep Night · 23-09</div>
+              <div style="color: #e2e8f0;">Kapil Kumar Kumar</div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Another away day -->
+        <tr style="background: #1f1008; border-bottom: 1px solid #222;">
+          <td style="padding: 0.5rem; font-weight: bold;">9 Wed</td>
+          <td style="padding: 0.5rem;"><span style="background: #b45309; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">AWAY</span></td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #2a1a0a; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Day · 09-23</div>
+              <div style="color: #e2e8f0;">Andrew Cockbill</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #2a1a0a; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Day · 09-23</div>
+              <div style="color: #e2e8f0;">Kapil Kumar Kumar</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1508; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Sleep Night · 23-09</div>
+              <div style="color: #e2e8f0;">Andrew Cockbill</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1508; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">Sleep Night · 23-09</div>
+              <div style="color: #e2e8f0;">Kapil Kumar Kumar</div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Interaction hints -->
+    <div style="padding: 1rem; background: #0f172a; border-top: 1px solid #333;">
+      <p style="margin: 0 0 0.5rem; color: #64748b; font-size: 0.75rem; font-weight: bold;">HOW IT WORKS:</p>
+      <ul style="margin: 0; padding-left: 1.2rem; color: #94a3b8; font-size: 0.78rem;">
+        <li><strong>Tap a shift card</strong> to change the assigned worker (dropdown of eligible team members)</li>
+        <li><strong>Tap the time</strong> to override the default hours for that shift</li>
+        <li><strong>"TO COVER"</strong> shown in red — these are gaps for the care company to fill</li>
+        <li><strong>Home days</strong> = blue rows · <strong>Away days</strong> = amber rows</li>
+        <li><strong>Auto-Fill</strong> button generates all shifts and assignments in one click</li>
+      </ul>
+    </div>
+
+  </div>
+</div>

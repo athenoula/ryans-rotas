@@ -1,0 +1,220 @@
+<h2>Monthly Rota View</h2>
+<p class="subtitle">Updated — unified columns, chronological order</p>
+
+<div class="mockup">
+  <div class="mockup-header">Monthly Rota — April 2026</div>
+  <div class="mockup-body" style="padding: 0; font-family: system-ui; font-size: 0.8rem; overflow-x: auto;">
+
+    <!-- Month selector bar -->
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: #1a1a2e; border-bottom: 1px solid #333;">
+      <button style="background: #333; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer;">← Mar</button>
+      <div style="text-align: center;">
+        <strong style="font-size: 1.1rem;">April 2026</strong>
+        <div style="color: #888; font-size: 0.75rem;">18 Home days · 12 Away days</div>
+      </div>
+      <button style="background: #333; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer;">May →</button>
+    </div>
+
+    <!-- Auto-fill button -->
+    <div style="padding: 0.75rem 1rem; background: #0d2137; border-bottom: 1px solid #333; display: flex; gap: 0.5rem; align-items: center;">
+      <button style="background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: bold;">⚡ Auto-Fill Shifts</button>
+      <span style="color: #888; font-size: 0.75rem;">Generates shifts from Year Planner · assigns workers by team · respects contracted hours</span>
+    </div>
+
+    <!-- Rota table - unified columns -->
+    <table style="width: 100%; border-collapse: collapse; min-width: 620px;">
+      <thead>
+        <tr style="background: #1e293b;">
+          <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #444; width: 70px;">Date</th>
+          <th style="padding: 0.5rem; text-align: center; border-bottom: 2px solid #444;">Short / Day</th>
+          <th style="padding: 0.5rem; text-align: center; border-bottom: 2px solid #444;">Long / Day</th>
+          <th style="padding: 0.5rem; text-align: center; border-bottom: 2px solid #444;">Waking / Sleep</th>
+          <th style="padding: 0.5rem; text-align: center; border-bottom: 2px solid #444;">Waking / Sleep</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Home day 1 -->
+        <tr style="background: #0a1628; border-bottom: 1px solid #222;">
+          <td style="padding: 0.5rem;">
+            <div style="font-weight: bold;">1 Tue</div>
+            <span style="background: #1e40af; color: white; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;">HOME</span>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a2744; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">09:00–18:00</div>
+              <div style="color: #ef4444; font-weight: bold;">TO COVER</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a2744; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">09:00–21:00</div>
+              <div style="color: #e2e8f0;">Karen Hughes</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1a3a; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">21:00–09:00</div>
+              <div style="color: #e2e8f0;">Alayo Obafemi</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1a3a; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">21:00–09:00</div>
+              <div style="color: #e2e8f0;">Ankita</div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Home day 2 -->
+        <tr style="background: #0d1b30; border-bottom: 1px solid #222;">
+          <td style="padding: 0.5rem;">
+            <div style="font-weight: bold;">2 Wed</div>
+            <span style="background: #1e40af; color: white; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;">HOME</span>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a2744; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">09:00–18:00</div>
+              <div style="color: #e2e8f0;">Karen Hughes</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a2744; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">09:00–21:00</div>
+              <div style="color: #e2e8f0;">Paige</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1a3a; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">21:00–09:00</div>
+              <div style="color: #e2e8f0;">Adekemi</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1a3a; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">21:00–09:00</div>
+              <div style="color: #e2e8f0;">Ankita</div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Ellipsis -->
+        <tr style="background: #0a1628; border-bottom: 1px solid #222;">
+          <td colspan="5" style="padding: 0.3rem; text-align: center; color: #555;">⋯ days 3–7 ⋯</td>
+        </tr>
+
+        <!-- Away day 8 -->
+        <tr style="background: #1a0d06; border-bottom: 1px solid #222;">
+          <td style="padding: 0.5rem;">
+            <div style="font-weight: bold;">8 Tue</div>
+            <span style="background: #b45309; color: white; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;">AWAY</span>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #2a1a0a; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">09:00–23:00</div>
+              <div style="color: #e2e8f0;">Andrew Cockbill</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #2a1a0a; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">09:00–23:00</div>
+              <div style="color: #e2e8f0;">Kapil Kumar Kumar</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1508; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">23:00–09:00</div>
+              <div style="color: #e2e8f0;">Andrew Cockbill</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1508; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">23:00–09:00</div>
+              <div style="color: #e2e8f0;">Kapil Kumar Kumar</div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Away day 9 -->
+        <tr style="background: #1f1008; border-bottom: 1px solid #222;">
+          <td style="padding: 0.5rem;">
+            <div style="font-weight: bold;">9 Wed</div>
+            <span style="background: #b45309; color: white; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;">AWAY</span>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #2a1a0a; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">09:00–23:00</div>
+              <div style="color: #e2e8f0;">Andrew Cockbill</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #2a1a0a; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">09:00–23:00</div>
+              <div style="color: #e2e8f0;">Kapil Kumar Kumar</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1508; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">23:00–09:00</div>
+              <div style="color: #e2e8f0;">Andrew Cockbill</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1508; border: 1px solid #44300a; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">23:00–09:00</div>
+              <div style="color: #e2e8f0;">Kapil Kumar Kumar</div>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Ellipsis -->
+        <tr style="background: #1a0d06; border-bottom: 1px solid #222;">
+          <td colspan="5" style="padding: 0.3rem; text-align: center; color: #555;">⋯ days 10–13 ⋯</td>
+        </tr>
+
+        <!-- Back to home day 14 -->
+        <tr style="background: #0a1628; border-bottom: 1px solid #222;">
+          <td style="padding: 0.5rem;">
+            <div style="font-weight: bold;">14 Mon</div>
+            <span style="background: #1e40af; color: white; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;">HOME</span>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a2744; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">09:00–18:00</div>
+              <div style="color: #ef4444; font-weight: bold;">TO COVER</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a2744; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">09:00–21:00</div>
+              <div style="color: #e2e8f0;">Karen Hughes</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1a3a; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">21:00–09:00</div>
+              <div style="color: #e2e8f0;">Alayo Obafemi</div>
+            </div>
+          </td>
+          <td style="padding: 0.4rem;">
+            <div style="background: #1a1a3a; border: 1px solid #334155; border-radius: 6px; padding: 0.4rem; text-align: center;">
+              <div style="color: #94a3b8; font-size: 0.7rem;">21:00–09:00</div>
+              <div style="color: #e2e8f0;">Ankita</div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Interaction hints -->
+    <div style="padding: 1rem; background: #0f172a; border-top: 1px solid #333;">
+      <p style="margin: 0 0 0.5rem; color: #64748b; font-size: 0.75rem; font-weight: bold;">COLUMN LOGIC:</p>
+      <ul style="margin: 0; padding-left: 1.2rem; color: #94a3b8; font-size: 0.78rem;">
+        <li><strong>Short / Day</strong> — Home: Short Day (09–18) · Away: Day Shift (09–23)</li>
+        <li><strong>Long / Day</strong> — Home: Long Day (09–21) · Away: Day Shift (09–23)</li>
+        <li><strong>Waking / Sleep</strong> — Home: Waking Night (21–09) · Away: Sleep Night (23–09)</li>
+        <li>The times inside each card show exactly which variant applies</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
