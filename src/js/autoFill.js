@@ -139,8 +139,14 @@ function getEligibleWorkers(workers, slotIndex, shiftType, day, availMap, hoursU
 
 function pickBestWorker(eligible, hoursUsed) {
   return eligible.sort((a, b) => {
-    const aTarget = a.monthlyHours || Infinity;
-    const bTarget = b.monthlyHours || Infinity;
+    // Priority 1: Contracted workers (maximum/minimum) before bank/adhoc
+    const aContracted = (a.contractType === 'maximum' || a.contractType === 'minimum') ? 1 : 0;
+    const bContracted = (b.contractType === 'maximum' || b.contractType === 'minimum') ? 1 : 0;
+    if (aContracted !== bContracted) return bContracted - aContracted;
+
+    // Priority 2: Among contracted, prefer whoever has the most hours still to fill
+    const aTarget = a.monthlyHours || 0;
+    const bTarget = b.monthlyHours || 0;
     const aRemaining = aTarget - (hoursUsed[a.id] || 0);
     const bRemaining = bTarget - (hoursUsed[b.id] || 0);
     return bRemaining - aRemaining;
