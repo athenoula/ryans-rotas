@@ -164,26 +164,44 @@ function renderRotaDays(daysInMonth, cal, rota, monthStr) {
     }
     html += `</tr>`;
 
-    // If more than 4 shifts (e.g. transition day with 6), render overflow row
+    // If more than 4 shifts (e.g. transition day with 6 or split shifts), render overflow row
     if (rawMode) {
       const shifts = rota?.days?.find(dp => dp.date === dateStr)?.shifts;
       if (shifts && shifts.length > 4) {
+        const nightTypes = ['wakingNight', 'sleepNight'];
+        const overflowShifts = shifts.slice(4);
+
         html += `<tr class="${rowClass}">`;
         html += `<td class="date-cell" style="border-top: none;"></td>`;
-        for (let s = 4; s < shifts.length; s++) {
-          const shift = shifts[s];
-          const worker = shift.assignedWorker ? getWorkerById(shift.assignedWorker) : null;
-          const workerName = worker ? worker.name : 'TO COVER';
-          const isCover = !worker;
-          html += `<td class="shift-cell" data-date="${dateStr}" data-slot="${s}">
-            <div class="shift-card ${isCover ? 'shift-cover' : ''}">
-              <div class="shift-time">${shift.startTime}–${shift.endTime}</div>
-              <div class="shift-worker ${isCover ? 'cover' : ''}">${workerName}</div>
-            </div>
-          </td>`;
+
+        // Build a 4-column layout: place overflow shifts in correct columns
+        // Night shifts go to columns 2-3, day shifts go to columns 0-1
+        const cols = [null, null, null, null];
+        let dayCol = 0, nightCol = 2;
+        for (const shift of overflowShifts) {
+          if (nightTypes.includes(shift.shiftType)) {
+            if (nightCol <= 3) { cols[nightCol] = shift; nightCol++; }
+          } else {
+            if (dayCol <= 1) { cols[dayCol] = shift; dayCol++; }
+          }
         }
-        for (let s = shifts.length; s < 8; s++) {
-          html += `<td></td>`;
+
+        for (let c = 0; c < 4; c++) {
+          const shift = cols[c];
+          if (shift) {
+            const sIdx = shifts.indexOf(shift);
+            const worker = shift.assignedWorker ? getWorkerById(shift.assignedWorker) : null;
+            const workerName = worker ? worker.name : 'TO COVER';
+            const isCover = !worker;
+            html += `<td class="shift-cell" data-date="${dateStr}" data-slot="${sIdx}">
+              <div class="shift-card ${isCover ? 'shift-cover' : ''}">
+                <div class="shift-time">${shift.startTime}–${shift.endTime}</div>
+                <div class="shift-worker ${isCover ? 'cover' : ''}">${workerName}</div>
+              </div>
+            </td>`;
+          } else {
+            html += `<td></td>`;
+          }
         }
         html += `</tr>`;
       }
