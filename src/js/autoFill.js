@@ -1,4 +1,4 @@
-import { getYearCalendar, getWorkers, getRota, saveRota, getAvailability } from './data.js';
+import { getYearCalendar, getWorkers, getRota, saveRota, getAvailability, getEffectiveMode } from './data.js';
 import { getShiftsForMode } from './shiftTemplates.js';
 
 export function runAutoFill(monthStr) {
@@ -26,10 +26,11 @@ export function runAutoFill(monthStr) {
 
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${monthStr}-${String(d).padStart(2, '0')}`;
-    const mode = cal.days[dateStr];
-    if (!mode) continue;
+    const rawMode = cal.days[dateStr];
+    if (!rawMode) continue;
 
-    const templates = getShiftsForMode(mode);
+    const effectiveMode = getEffectiveMode(dateStr);
+    const templates = getShiftsForMode(effectiveMode);
     const shifts = templates.map((tmpl, i) => ({
       slotIndex: i,
       shiftType: tmpl.type,
@@ -39,7 +40,8 @@ export function runAutoFill(monthStr) {
       assignedWorker: null,
     }));
 
-    if (mode === 'away') {
+    if (effectiveMode === 'away') {
+      // Pure away day: assign away team to all slots
       const awayWorker1 = awayTeam[0];
       const awayWorker2 = awayTeam[1];
 
@@ -57,11 +59,55 @@ export function runAutoFill(monthStr) {
       for (const w of workers.filter(w => w.team !== 'away')) {
         consecutiveDays[w.id] = 0;
       }
+    } else if (effectiveMode === 'transition-away') {
+      // Leaving home: home staff morning (slots 0-1), away staff afternoon+night (slots 2-5)
+      // Slots 0-1 are shortDay (home staff), slots 2-3 are dayShift (away staff), slots 4-5 are sleepNight (away staff)
+      for (let s = 0; s < shifts.length; s++) {
+        const shift = shifts[s];
+        if (shift.shiftType === 'shortDay') {
+          // Home/bank staff
+          const eligible = getEligibleWorkers(workers, s, shift.shiftType, d, availMap, hoursUsed, consecutiveDays, shifts);
+          if (eligible.length > 0) {
+            const best = pickBestWorker(eligible, hoursUsed);
+            shift.assignedWorker = best.id;
+            hoursUsed[best.id] += shift.hours;
+          }
+        } else {
+          // Away staff
+          const awayIdx = (shift.shiftType === 'dayShift') ? (s - 2) : (s - 4);
+          const awayWorker = awayTeam[awayIdx % 2];
+          if (awayWorker && !isBlocked(awayWorker.id, d, availMap)) {
+            shift.assignedWorker = awayWorker.id;
+            hoursUsed[awayWorker.id] += shift.hours;
+          }
+        }
+      }
+    } else if (effectiveMode === 'transition-home') {
+      // Coming home: away staff day (slots 0-1), home night staff (slots 2-3)
+      for (let s = 0; s < shifts.length; s++) {
+        const shift = shifts[s];
+        if (shift.shiftType === 'dayShift') {
+          const awayWorker = awayTeam[s % 2];
+          if (awayWorker && !isBlocked(awayWorker.id, d, availMap)) {
+            shift.assignedWorker = awayWorker.id;
+            hoursUsed[awayWorker.id] += shift.hours;
+          }
+        } else {
+          // Waking night - home/bank/adhoc staff
+          const eligible = getEligibleWorkers(workers, s, shift.shiftType, d, availMap, hoursUsed, consecutiveDays, shifts);
+          if (eligible.length > 0) {
+            const best = pickBestWorker(eligible, hoursUsed);
+            shift.assignedWorker = best.id;
+            hoursUsed[best.id] += shift.hours;
+          }
+        }
+      }
     } else {
+      // Home day: standard assignment logic
       for (const w of workers) {
         const avail = availMap[w.id];
         for (const pref of avail.preferredShifts) {
-          if (pref.day === d && shifts[pref.shiftSlot].assignedWorker === null) {
+          if (pref.day === d && pref.shiftSlot < shifts.length && shifts[pref.shiftSlot].assignedWorker === null) {
             if (canAssign(w, d, pref.shiftSlot, shifts, availMap, hoursUsed, consecutiveDays)) {
               shifts[pref.shiftSlot].assignedWorker = w.id;
               hoursUsed[w.id] += shifts[pref.shiftSlot].hours;
@@ -70,7 +116,7 @@ export function runAutoFill(monthStr) {
         }
       }
 
-      for (let s = 0; s < 4; s++) {
+      for (let s = 0; s < shifts.length; s++) {
         if (shifts[s].assignedWorker !== null) continue;
 
         const eligible = getEligibleWorkers(workers, s, shifts[s].shiftType, d, availMap, hoursUsed, consecutiveDays, shifts);
@@ -91,7 +137,7 @@ export function runAutoFill(monthStr) {
       }
     }
 
-    days.push({ date: dateStr, mode, shifts });
+    days.push({ date: dateStr, mode: effectiveMode, shifts });
   }
 
   const rota = { month: monthStr, days, version: 'V1', status: 'draft' };

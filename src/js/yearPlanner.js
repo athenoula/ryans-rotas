@@ -1,5 +1,5 @@
 // src/js/yearPlanner.js
-import { getYearCalendar, setDayMode } from './data.js';
+import { getYearCalendar, setDayMode, getEffectiveMode } from './data.js';
 
 let currentYear = new Date().getFullYear();
 
@@ -16,6 +16,7 @@ export function renderYearPlanner(container) {
       <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem; font-size: 0.8rem;">
         <span><span style="display:inline-block;width:12px;height:12px;background:var(--blue-badge);border-radius:3px;"></span> Home</span>
         <span><span style="display:inline-block;width:12px;height:12px;background:var(--amber-badge);border-radius:3px;"></span> Away</span>
+        <span><span style="display:inline-block;width:12px;height:12px;background:#7c3aed;border-radius:3px;"></span> Transition</span>
         <span><span style="display:inline-block;width:12px;height:12px;background:var(--bg-card);border-radius:3px;border:1px solid var(--border);"></span> Not set</span>
       </div>
       <div class="year-grid" id="year-grid">
@@ -60,8 +61,10 @@ function renderMonths(cal) {
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${currentYear}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const mode = cal.days[dateStr] || null;
+      const effectiveMode = mode ? getEffectiveMode(dateStr) : null;
       let cls = 'yp-day';
-      if (mode === 'home') { cls += ' home'; homeDays++; }
+      if (effectiveMode === 'transition-away' || effectiveMode === 'transition-home') { cls += ' transition'; awayDays++; }
+      else if (mode === 'home') { cls += ' home'; homeDays++; }
       else if (mode === 'away') { cls += ' away'; awayDays++; }
       dayCells += `<div class="${cls}" data-date="${dateStr}">${d}</div>`;
     }
@@ -130,6 +133,7 @@ function addYearStyles() {
     .yp-day:not(.empty):hover { outline: 1px solid var(--text-dim); }
     .yp-day.home { background: var(--blue-badge); color: white; }
     .yp-day.away { background: var(--amber-badge); color: white; }
+    .yp-day.transition { background: #7c3aed; color: white; }
   `;
   document.head.appendChild(style);
 }

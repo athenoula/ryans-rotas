@@ -85,6 +85,35 @@ export function setDayMode(year, dateStr, mode) {
   save();
 }
 
+// Returns the effective mode for a date, detecting transition days automatically.
+// A transition-away day is the first day of an away block (previous day was home/unset).
+// A transition-home day is the last day of an away block (next day is home/unset).
+// If a day is both first and last (single away day), it's transition-away.
+export function getEffectiveMode(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const cal = getYearCalendar(y);
+  const mode = cal.days[dateStr] || null;
+  if (mode !== 'away') return mode;
+
+  const prevDate = new Date(y, m - 1, d - 1);
+  const nextDate = new Date(y, m - 1, d + 1);
+  const prevStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}-${String(prevDate.getDate()).padStart(2, '0')}`;
+  const nextStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
+
+  // Check across year boundaries
+  const prevCal = getYearCalendar(prevDate.getFullYear());
+  const nextCal = getYearCalendar(nextDate.getFullYear());
+  const prevMode = prevCal.days[prevStr] || null;
+  const nextMode = nextCal.days[nextStr] || null;
+
+  const isFirstAway = prevMode !== 'away';
+  const isLastAway = nextMode !== 'away';
+
+  if (isFirstAway) return 'transition-away';
+  if (isLastAway) return 'transition-home';
+  return 'away';
+}
+
 export function getRota(month) {
   return data.rotas[month] || null;
 }
