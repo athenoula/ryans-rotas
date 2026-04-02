@@ -1,6 +1,5 @@
 // src/js/export.js
 import { getRota, getWorkers, getWorkerById, exportAllData, importAllData } from './data.js';
-import { calculateWorkerHours } from './hoursDashboard.js';
 
 let exportMonth = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
@@ -75,6 +74,72 @@ export function renderSettings(container) {
   });
 }
 
+// Build worker hours directly from rota shift data
+function buildWorkerHoursFromRota(rota, monthStr) {
+  const [yearStr, monthNumStr] = monthStr.split('-');
+  const daysInMonth = new Date(Number(yearStr), Number(monthNumStr), 0).getDate();
+  const weeksInMonth = daysInMonth / 7;
+
+  const shiftLabels = {
+    shortDay: 'Short Day', longDay: 'Long Day', wakingNight: 'Waking Night',
+    dayShift: 'Day Shift', sleepNight: 'Sleep Night',
+  };
+
+  // Collect hours from every assigned shift in the rota
+  const workerMap = {};
+  for (const day of rota.days) {
+    const dayNum = Number(day.date.split('-')[2]);
+    const suffix = getOrdinalSuffix(dayNum);
+    const dow = new Date(Number(yearStr), Number(monthNumStr) - 1, dayNum).toLocaleString('en-GB', { weekday: 'short' });
+    for (const shift of day.shifts) {
+      if (!shift.assignedWorker) continue;
+      if (!workerMap[shift.assignedWorker]) {
+        const w = getWorkerById(shift.assignedWorker);
+        workerMap[shift.assignedWorker] = {
+          id: shift.assignedWorker,
+          name: w ? w.name : shift.assignedWorker,
+          monthlyHours: w?.monthlyHours || null,
+          team: w?.team || '?',
+          totalHours: 0,
+          shiftCount: 0,
+          shifts: [],
+        };
+      }
+      const entry = workerMap[shift.assignedWorker];
+      entry.totalHours += shift.hours;
+      entry.shiftCount++;
+      entry.shifts.push({
+        dateLabel: `${dow} ${dayNum}${suffix}`,
+        timeLabel: `${shift.startTime}-${shift.endTime}`,
+        hours: shift.hours,
+        typeLabel: shiftLabels[shift.shiftType] || shift.shiftType,
+      });
+    }
+  }
+
+  // Also include active workers with 0 shifts
+  for (const w of getWorkers()) {
+    if (!workerMap[w.id]) {
+      workerMap[w.id] = {
+        id: w.id,
+        name: w.name,
+        monthlyHours: w.monthlyHours,
+        team: w.team,
+        totalHours: 0,
+        shiftCount: 0,
+        shifts: [],
+      };
+    }
+  }
+
+  // Add weekly averages
+  for (const entry of Object.values(workerMap)) {
+    entry.weeklyAvg = weeksInMonth > 0 ? Math.round((entry.totalHours / weeksInMonth) * 100) / 100 : 0;
+  }
+
+  return Object.values(workerMap);
+}
+
 function generateExcel(monthStr) {
   const rota = getRota(monthStr);
   if (!rota || !rota.days.length) { alert('No rota data for this month.'); return; }
@@ -82,11 +147,12 @@ function generateExcel(monthStr) {
   const [yearStr, monthNumStr] = monthStr.split('-');
   const monthName = new Date(Number(yearStr), Number(monthNumStr) - 1, 1).toLocaleString('en-GB', { month: 'long' });
 
-  const rows = [['Date', 'Shift', 'Hours', 'Service Type', 'Name']];
   const shiftLabels = {
     shortDay: 'Short Day', longDay: 'Long Day', wakingNight: 'Waking Night',
     dayShift: 'Day Shift', sleepNight: 'Sleep Night',
   };
+
+  const rows = [['Date', 'Shift', 'Hours', 'Service Type', 'Name']];
 
   for (const day of rota.days) {
     const dayNum = Number(day.date.split('-')[2]);
@@ -106,12 +172,12 @@ function generateExcel(monthStr) {
     rows.push([]); // blank row between days
   }
 
+  // Summary built from actual rota data
+  const workerHours = buildWorkerHoursFromRota(rota, monthStr);
+
   rows.push([]);
   rows.push(['Worker', 'Total Hours', 'Shifts', 'Weekly Avg']);
-  const hoursSummary = calculateWorkerHours(monthStr);
-  for (const h of hoursSummary) {
-    const w = getWorkerById(h.workerId);
-    if (!w?.active) continue;
+  for (const h of workerHours) {
     rows.push([h.name, h.totalHours, h.shiftCount, h.weeklyAvg]);
   }
 
@@ -120,51 +186,33 @@ function generateExcel(monthStr) {
   ws['!cols'] = [{ wch: 8 }, { wch: 12 }, { wch: 6 }, { wch: 14 }, { wch: 22 }];
   XLSX.utils.book_append_sheet(wb, ws, 'Rota');
 
-  // Per-worker sheets — one per active worker, even if no shifts
-  const workers = getWorkers();
-  for (const worker of workers) {
+  // Per-worker sheets
+  for (const wh of workerHours) {
     const workerRows = [
-      [`${worker.name} — ${monthName} ${yearStr}`],
+      [`${wh.name} — ${monthName} ${yearStr}`],
       [],
       ['Date', 'Shift', 'Hours', 'Service Type'],
     ];
-    let totalHours = 0;
-    let shiftCount = 0;
 
-    for (const day of rota.days) {
-      const dayNum = Number(day.date.split('-')[2]);
-      const suffix = getOrdinalSuffix(dayNum);
-      const dow = new Date(Number(yearStr), Number(monthNumStr) - 1, dayNum).toLocaleString('en-GB', { weekday: 'short' });
-      for (const shift of day.shifts) {
-        if (shift.assignedWorker === worker.id) {
-          workerRows.push([
-            `${dow} ${dayNum}${suffix}`,
-            `${shift.startTime}-${shift.endTime}`,
-            shift.hours,
-            shiftLabels[shift.shiftType] || shift.shiftType,
-          ]);
-          totalHours += shift.hours;
-          shiftCount++;
-        }
+    if (wh.shifts.length === 0) {
+      workerRows.push(['No shifts assigned this month']);
+    } else {
+      for (const s of wh.shifts) {
+        workerRows.push([s.dateLabel, s.timeLabel, s.hours, s.typeLabel]);
       }
     }
 
-    if (shiftCount === 0) {
-      workerRows.push(['No shifts assigned this month']);
-    }
-
     workerRows.push([]);
-    workerRows.push(['Total Hours', totalHours]);
-    workerRows.push(['Total Shifts', shiftCount]);
-    if (worker.monthlyHours) {
-      workerRows.push(['Contracted Hours', worker.monthlyHours]);
-      workerRows.push(['Remaining', worker.monthlyHours - totalHours]);
+    workerRows.push(['Total Hours', wh.totalHours]);
+    workerRows.push(['Total Shifts', wh.shiftCount]);
+    if (wh.monthlyHours) {
+      workerRows.push(['Contracted Hours', wh.monthlyHours]);
+      workerRows.push(['Remaining', wh.monthlyHours - wh.totalHours]);
     }
 
     const workerWs = XLSX.utils.aoa_to_sheet(workerRows);
     workerWs['!cols'] = [{ wch: 14 }, { wch: 12 }, { wch: 8 }, { wch: 14 }];
-    // Sheet name max 31 chars, no special chars
-    const sheetName = worker.name.slice(0, 31);
+    const sheetName = wh.name.slice(0, 31);
     XLSX.utils.book_append_sheet(wb, workerWs, sheetName);
   }
 
@@ -216,14 +264,14 @@ function generatePdf(monthStr) {
     theme: 'grid',
   });
 
+  // Summary built from actual rota data
+  const workerHours = buildWorkerHoursFromRota(rota, monthStr);
+
   const summaryY = doc.lastAutoTable.finalY + 10;
   doc.setFontSize(12);
   doc.text('Summary', 14, summaryY);
 
-  const hoursSummary = calculateWorkerHours(monthStr);
-  const summaryRows = hoursSummary
-    .filter(h => { const w = getWorkerById(h.workerId); return w?.active; })
-    .map(h => [h.name, h.totalHours, h.shiftCount, h.weeklyAvg]);
+  const summaryRows = workerHours.map(h => [h.name, h.totalHours, h.shiftCount, h.weeklyAvg]);
 
   doc.autoTable({
     startY: summaryY + 5,
@@ -234,52 +282,32 @@ function generatePdf(monthStr) {
     theme: 'grid',
   });
 
-  // Per-worker pages — one per active worker
-  for (const worker of getWorkers()) {
-    const workerShifts = [];
-    let totalHours = 0;
-
-    for (const day of rota.days) {
-      const dayNum = Number(day.date.split('-')[2]);
-      const suffix = getOrdinalSuffix(dayNum);
-      const dow = new Date(Number(yearStr), Number(monthNumStr) - 1, dayNum).toLocaleString('en-GB', { weekday: 'short' });
-      for (const shift of day.shifts) {
-        if (shift.assignedWorker === worker.id) {
-          workerShifts.push([
-            `${dow} ${dayNum}${suffix}`,
-            `${shift.startTime}-${shift.endTime}`,
-            shift.hours,
-            shiftLabels[shift.shiftType] || shift.shiftType,
-          ]);
-          totalHours += shift.hours;
-        }
-      }
-    }
-
+  // Per-worker pages
+  for (const wh of workerHours) {
     doc.addPage();
     doc.setFontSize(14);
-    doc.text(`${worker.name} — ${monthName} ${yearStr}`, 14, 20);
+    doc.text(`${wh.name} — ${monthName} ${yearStr}`, 14, 20);
 
-    if (workerShifts.length === 0) {
+    if (wh.shifts.length === 0) {
       doc.setFontSize(10);
       doc.text('No shifts assigned this month', 14, 35);
     } else {
       doc.autoTable({
         startY: 30,
         head: [['Date', 'Shift', 'Hours', 'Type']],
-        body: workerShifts,
+        body: wh.shifts.map(s => [s.dateLabel, s.timeLabel, s.hours, s.typeLabel]),
         styles: { fontSize: 9, cellPadding: 2 },
         headStyles: { fillColor: [30, 41, 59] },
         theme: 'grid',
       });
     }
 
-    const y = workerShifts.length > 0 ? doc.lastAutoTable.finalY + 10 : 45;
+    const y = wh.shifts.length > 0 ? doc.lastAutoTable.finalY + 10 : 45;
     doc.setFontSize(11);
-    doc.text(`Total Hours: ${totalHours}`, 14, y);
-    doc.text(`Total Shifts: ${workerShifts.length}`, 14, y + 7);
-    if (worker.monthlyHours) {
-      doc.text(`Contracted: ${worker.monthlyHours} hrs  |  Remaining: ${worker.monthlyHours - totalHours}`, 14, y + 14);
+    doc.text(`Total Hours: ${wh.totalHours}`, 14, y);
+    doc.text(`Total Shifts: ${wh.shiftCount}`, 14, y + 7);
+    if (wh.monthlyHours) {
+      doc.text(`Contracted: ${wh.monthlyHours} hrs  |  Remaining: ${wh.monthlyHours - wh.totalHours}`, 14, y + 14);
     }
   }
 
