@@ -117,6 +117,53 @@ function generateExcel(monthStr) {
   const ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [{ wch: 8 }, { wch: 12 }, { wch: 6 }, { wch: 14 }, { wch: 22 }];
   XLSX.utils.book_append_sheet(wb, ws, 'Rota');
+
+  // Per-worker sheets
+  const workers = getWorkers(true);
+  for (const worker of workers) {
+    const workerRows = [
+      [`${worker.name} — ${monthName} ${yearStr}`],
+      [],
+      ['Date', 'Shift', 'Hours', 'Service Type'],
+    ];
+    let totalHours = 0;
+    let shiftCount = 0;
+
+    for (const day of rota.days) {
+      const dayNum = Number(day.date.split('-')[2]);
+      const suffix = getOrdinalSuffix(dayNum);
+      const dow = new Date(Number(yearStr), Number(monthNumStr) - 1, dayNum).toLocaleString('en-GB', { weekday: 'short' });
+      for (const shift of day.shifts) {
+        if (shift.assignedWorker === worker.id) {
+          workerRows.push([
+            `${dow} ${dayNum}${suffix}`,
+            `${shift.startTime}-${shift.endTime}`,
+            shift.hours,
+            shiftLabels[shift.shiftType] || shift.shiftType,
+          ]);
+          totalHours += shift.hours;
+          shiftCount++;
+        }
+      }
+    }
+
+    if (shiftCount === 0) continue;
+
+    workerRows.push([]);
+    workerRows.push(['Total Hours', totalHours]);
+    workerRows.push(['Total Shifts', shiftCount]);
+    if (worker.monthlyHours) {
+      workerRows.push(['Contracted Hours', worker.monthlyHours]);
+      workerRows.push(['Remaining', worker.monthlyHours - totalHours]);
+    }
+
+    const workerWs = XLSX.utils.aoa_to_sheet(workerRows);
+    workerWs['!cols'] = [{ wch: 14 }, { wch: 12 }, { wch: 8 }, { wch: 14 }];
+    // Sheet name max 31 chars, no special chars
+    const sheetName = worker.name.slice(0, 31);
+    XLSX.utils.book_append_sheet(wb, workerWs, sheetName);
+  }
+
   XLSX.writeFile(wb, `Rota ${monthName} ${yearStr}.xlsx`);
 }
 
@@ -182,6 +229,53 @@ function generatePdf(monthStr) {
     headStyles: { fillColor: [30, 41, 59] },
     theme: 'grid',
   });
+
+  // Per-worker pages
+  const workers = getWorkers(true);
+  for (const worker of workers) {
+    const workerShifts = [];
+    let totalHours = 0;
+
+    for (const day of rota.days) {
+      const dayNum = Number(day.date.split('-')[2]);
+      const suffix = getOrdinalSuffix(dayNum);
+      const dow = new Date(Number(yearStr), Number(monthNumStr) - 1, dayNum).toLocaleString('en-GB', { weekday: 'short' });
+      for (const shift of day.shifts) {
+        if (shift.assignedWorker === worker.id) {
+          workerShifts.push([
+            `${dow} ${dayNum}${suffix}`,
+            `${shift.startTime}-${shift.endTime}`,
+            shift.hours,
+            shiftLabels[shift.shiftType] || shift.shiftType,
+          ]);
+          totalHours += shift.hours;
+        }
+      }
+    }
+
+    if (workerShifts.length === 0) continue;
+
+    doc.addPage();
+    doc.setFontSize(14);
+    doc.text(`${worker.name} — ${monthName} ${yearStr}`, 14, 20);
+
+    doc.autoTable({
+      startY: 30,
+      head: [['Date', 'Shift', 'Hours', 'Type']],
+      body: workerShifts,
+      styles: { fontSize: 9, cellPadding: 2 },
+      headStyles: { fillColor: [30, 41, 59] },
+      theme: 'grid',
+    });
+
+    const y = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(11);
+    doc.text(`Total Hours: ${totalHours}`, 14, y);
+    doc.text(`Total Shifts: ${workerShifts.length}`, 14, y + 7);
+    if (worker.monthlyHours) {
+      doc.text(`Contracted: ${worker.monthlyHours} hrs  |  Remaining: ${worker.monthlyHours - totalHours}`, 14, y + 14);
+    }
+  }
 
   doc.save(`Rota ${monthName} ${yearStr}.pdf`);
 }
