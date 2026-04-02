@@ -109,7 +109,9 @@ function generateExcel(monthStr) {
   rows.push([]);
   rows.push(['Worker', 'Total Hours', 'Shifts', 'Weekly Avg']);
   const hoursSummary = calculateWorkerHours(monthStr);
-  for (const h of hoursSummary.filter(h => h.totalHours > 0)) {
+  for (const h of hoursSummary) {
+    const w = getWorkerById(h.workerId);
+    if (!w?.active) continue;
     rows.push([h.name, h.totalHours, h.shiftCount, h.weeklyAvg]);
   }
 
@@ -118,8 +120,8 @@ function generateExcel(monthStr) {
   ws['!cols'] = [{ wch: 8 }, { wch: 12 }, { wch: 6 }, { wch: 14 }, { wch: 22 }];
   XLSX.utils.book_append_sheet(wb, ws, 'Rota');
 
-  // Per-worker sheets
-  const workers = getWorkers(true);
+  // Per-worker sheets — one per active worker, even if no shifts
+  const workers = getWorkers();
   for (const worker of workers) {
     const workerRows = [
       [`${worker.name} — ${monthName} ${yearStr}`],
@@ -147,7 +149,9 @@ function generateExcel(monthStr) {
       }
     }
 
-    if (shiftCount === 0) continue;
+    if (shiftCount === 0) {
+      workerRows.push(['No shifts assigned this month']);
+    }
 
     workerRows.push([]);
     workerRows.push(['Total Hours', totalHours]);
@@ -218,7 +222,7 @@ function generatePdf(monthStr) {
 
   const hoursSummary = calculateWorkerHours(monthStr);
   const summaryRows = hoursSummary
-    .filter(h => h.totalHours > 0)
+    .filter(h => { const w = getWorkerById(h.workerId); return w?.active; })
     .map(h => [h.name, h.totalHours, h.shiftCount, h.weeklyAvg]);
 
   doc.autoTable({
@@ -230,9 +234,8 @@ function generatePdf(monthStr) {
     theme: 'grid',
   });
 
-  // Per-worker pages
-  const workers = getWorkers(true);
-  for (const worker of workers) {
+  // Per-worker pages — one per active worker
+  for (const worker of getWorkers()) {
     const workerShifts = [];
     let totalHours = 0;
 
@@ -253,22 +256,25 @@ function generatePdf(monthStr) {
       }
     }
 
-    if (workerShifts.length === 0) continue;
-
     doc.addPage();
     doc.setFontSize(14);
     doc.text(`${worker.name} — ${monthName} ${yearStr}`, 14, 20);
 
-    doc.autoTable({
-      startY: 30,
-      head: [['Date', 'Shift', 'Hours', 'Type']],
-      body: workerShifts,
-      styles: { fontSize: 9, cellPadding: 2 },
-      headStyles: { fillColor: [30, 41, 59] },
-      theme: 'grid',
-    });
+    if (workerShifts.length === 0) {
+      doc.setFontSize(10);
+      doc.text('No shifts assigned this month', 14, 35);
+    } else {
+      doc.autoTable({
+        startY: 30,
+        head: [['Date', 'Shift', 'Hours', 'Type']],
+        body: workerShifts,
+        styles: { fontSize: 9, cellPadding: 2 },
+        headStyles: { fillColor: [30, 41, 59] },
+        theme: 'grid',
+      });
+    }
 
-    const y = doc.lastAutoTable.finalY + 10;
+    const y = workerShifts.length > 0 ? doc.lastAutoTable.finalY + 10 : 45;
     doc.setFontSize(11);
     doc.text(`Total Hours: ${totalHours}`, 14, y);
     doc.text(`Total Shifts: ${workerShifts.length}`, 14, y + 7);
