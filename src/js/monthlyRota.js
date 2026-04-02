@@ -5,6 +5,7 @@ import { showModal, closeModal } from './app.js';
 
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
+let zoomLevel = 100;
 
 export function renderMonthlyRota(container) {
   const monthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
@@ -30,12 +31,17 @@ export function renderMonthlyRota(container) {
       </div>
       <button class="btn btn-ghost" id="next-month">→</button>
     </div>
-    <div style="padding: 0.5rem 0.5rem 0; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+    <div style="padding: 0.5rem 0.5rem 0; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
       <button class="btn btn-success" id="auto-fill-btn">⚡ Auto-Fill</button>
       <button class="btn btn-ghost" id="pre-populate-btn">📝 Availability</button>
       <button class="btn btn-ghost" id="clear-rota-btn" style="color: var(--red);">Clear</button>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 0.3rem;">
+        <button class="btn btn-ghost" id="zoom-out-btn" style="padding: 0.3rem 0.6rem; font-size: 1rem;">−</button>
+        <span id="zoom-label" style="font-size: 0.75rem; color: var(--text-muted); min-width: 40px; text-align: center;">${zoomLevel}%</span>
+        <button class="btn btn-ghost" id="zoom-in-btn" style="padding: 0.3rem 0.6rem; font-size: 1rem;">+</button>
+      </div>
     </div>
-    <div style="overflow-x: auto; padding: 0.5rem;">
+    <div style="overflow-x: auto; padding: 0.5rem;" id="rota-scroll-container">
       <table class="rota-table" id="rota-table">
         <thead>
           <tr>
@@ -81,6 +87,24 @@ export function renderMonthlyRota(container) {
     }
   });
 
+  // Apply current zoom
+  const rotaTable = container.querySelector('#rota-table');
+  rotaTable.style.transform = `scale(${zoomLevel / 100})`;
+  rotaTable.style.transformOrigin = 'top left';
+  const scrollContainer = container.querySelector('#rota-scroll-container');
+  if (scrollContainer) scrollContainer.style.minHeight = rotaTable.offsetHeight * (zoomLevel / 100) + 'px';
+
+  container.querySelector('#zoom-in-btn').addEventListener('click', () => {
+    zoomLevel = Math.min(150, zoomLevel + 10);
+    rotaTable.style.transform = `scale(${zoomLevel / 100})`;
+    container.querySelector('#zoom-label').textContent = zoomLevel + '%';
+  });
+  container.querySelector('#zoom-out-btn').addEventListener('click', () => {
+    zoomLevel = Math.max(50, zoomLevel - 10);
+    rotaTable.style.transform = `scale(${zoomLevel / 100})`;
+    container.querySelector('#zoom-label').textContent = zoomLevel + '%';
+  });
+
   container.querySelector('#rota-table').addEventListener('click', (e) => {
     const cell = e.target.closest('.shift-cell[data-date][data-slot]');
     if (!cell) return;
@@ -119,8 +143,9 @@ function renderRotaDays(daysInMonth, cal, rota, monthStr) {
         slotIndex: i, shiftType: t.type, startTime: t.startTime, endTime: t.endTime, hours: t.hours, assignedWorker: null,
       }));
 
-      // Render shifts - could be 4, 6, or any number
-      for (let s = 0; s < shifts.length; s++) {
+      // Render first 4 shifts in the main row; overflow goes to a second row below
+      const mainCount = Math.min(shifts.length, 4);
+      for (let s = 0; s < mainCount; s++) {
         const shift = shifts[s];
         const worker = shift.assignedWorker ? getWorkerById(shift.assignedWorker) : null;
         const workerName = worker ? worker.name : 'TO COVER';
@@ -133,12 +158,8 @@ function renderRotaDays(daysInMonth, cal, rota, monthStr) {
           </div>
         </td>`;
       }
-      // Fill remaining columns if fewer than 4 shifts (pad to keep table aligned)
-      // Or if more than 4, they'll overflow — we handle this with extra rows
-      if (shifts.length <= 4) {
-        for (let s = shifts.length; s < 4; s++) {
-          html += `<td></td>`;
-        }
+      for (let s = mainCount; s < 4; s++) {
+        html += `<td></td>`;
       }
     }
     html += `</tr>`;

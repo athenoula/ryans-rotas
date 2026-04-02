@@ -3,15 +3,15 @@ import { PRELOAD_CALENDARS, PRELOAD_ROTAS } from './preloadData.js';
 const STORAGE_KEY = 'ryansRotas';
 
 const DEFAULT_WORKERS = [
-  { id: 'w1', name: 'Karen Hughes', team: 'home', contractType: 'maximum', monthlyHours: 150, allowedShiftTypes: ['shortDay', 'longDay'], active: true },
-  { id: 'w2', name: 'Alayo Obafemi', team: 'home', contractType: 'maximum', monthlyHours: 150, allowedShiftTypes: ['shortDay', 'longDay', 'wakingNight'], active: true },
-  { id: 'w3', name: 'Andrew Cockbill', team: 'away', contractType: 'away-linked', monthlyHours: null, allowedShiftTypes: ['dayShift', 'sleepNight'], active: true },
-  { id: 'w4', name: 'Kapil Kumar Kumar', team: 'away', contractType: 'minimum', monthlyHours: 150, allowedShiftTypes: ['dayShift', 'sleepNight'], active: true },
-  { id: 'w5', name: 'Karen Cockbill', team: 'bank', contractType: 'bank', monthlyHours: null, allowedShiftTypes: ['shortDay', 'longDay'], active: true },
-  { id: 'w6', name: 'Ankita', team: 'adhoc', contractType: 'adhoc', monthlyHours: null, allowedShiftTypes: ['shortDay', 'longDay', 'wakingNight'], active: true },
-  { id: 'w7', name: 'Adekemi', team: 'adhoc', contractType: 'adhoc', monthlyHours: null, allowedShiftTypes: ['wakingNight'], active: true },
-  { id: 'w8', name: 'Paige', team: 'adhoc', contractType: 'adhoc', monthlyHours: null, allowedShiftTypes: ['shortDay', 'longDay'], active: true },
-  { id: 'w9', name: 'Imogen Parkinson', team: 'adhoc', contractType: 'adhoc', monthlyHours: null, allowedShiftTypes: ['shortDay', 'longDay'], active: true },
+  { id: 'w1', name: 'Karen Hughes', team: 'home', contractType: 'maximum', monthlyHours: 150, allowedShiftTypes: ['shortDay', 'longDay'], workingDays: [0,1,2,3,4,5,6], active: true },
+  { id: 'w2', name: 'Alayo Obafemi', team: 'home', contractType: 'maximum', monthlyHours: 150, allowedShiftTypes: ['shortDay', 'longDay', 'wakingNight'], workingDays: [0,1,2,3,4,5,6], active: true },
+  { id: 'w3', name: 'Andrew Cockbill', team: 'away', contractType: 'away-linked', monthlyHours: null, allowedShiftTypes: ['dayShift', 'sleepNight'], workingDays: [0,1,2,3,4,5,6], active: true },
+  { id: 'w4', name: 'Kapil Kumar Kumar', team: 'away', contractType: 'minimum', monthlyHours: 150, allowedShiftTypes: ['dayShift', 'sleepNight'], workingDays: [0,1,2,3,4,5,6], active: true },
+  { id: 'w5', name: 'Karen Cockbill', team: 'bank', contractType: 'bank', monthlyHours: null, allowedShiftTypes: ['shortDay', 'longDay'], workingDays: [0,1,2,3,4,5,6], active: true },
+  { id: 'w6', name: 'Ankita', team: 'adhoc', contractType: 'adhoc', monthlyHours: null, allowedShiftTypes: ['shortDay', 'longDay', 'wakingNight'], workingDays: [0,1,2,3,4,5,6], active: true },
+  { id: 'w7', name: 'Adekemi', team: 'adhoc', contractType: 'adhoc', monthlyHours: null, allowedShiftTypes: ['wakingNight'], workingDays: [0,1,2,3,4,5,6], active: true },
+  { id: 'w8', name: 'Paige', team: 'adhoc', contractType: 'adhoc', monthlyHours: null, allowedShiftTypes: ['shortDay', 'longDay'], workingDays: [0,1,2,3,4,5,6], active: true },
+  { id: 'w9', name: 'Imogen Parkinson', team: 'adhoc', contractType: 'adhoc', monthlyHours: null, allowedShiftTypes: ['shortDay', 'longDay'], workingDays: [0,1,2,3,4,5,6], active: true },
 ];
 
 let data = null;

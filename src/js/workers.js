@@ -120,6 +120,18 @@ function openWorkerForm(editId = null) {
           `).join('')}
         </div>
       </div>
+      <div class="form-group">
+        <label>Working Days</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.25rem;">
+          ${[['0','Sun'],['1','Mon'],['2','Tue'],['3','Wed'],['4','Thu'],['5','Fri'],['6','Sat']].map(([val, label]) => `
+            <label style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; color: var(--text);">
+              <input type="checkbox" name="workingDay" value="${val}"
+                ${(worker?.workingDays || [0,1,2,3,4,5,6]).includes(Number(val)) ? 'checked' : ''}>
+              ${label}
+            </label>
+          `).join('')}
+        </div>
+      </div>
       <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem;">
         <button type="button" class="btn btn-ghost" id="cancel-worker">Cancel</button>
         <button type="submit" class="btn btn-primary">${isEdit ? 'Save' : 'Add'}</button>
@@ -132,12 +144,14 @@ function openWorkerForm(editId = null) {
     e.preventDefault();
     const form = e.target;
     const shiftTypes = Array.from(form.querySelectorAll('input[name="shiftType"]:checked')).map(cb => cb.value);
+    const workingDays = Array.from(form.querySelectorAll('input[name="workingDay"]:checked')).map(cb => Number(cb.value));
     const workerData = {
       name: form.name.value.trim(),
       team: form.team.value,
       contractType: form.contractType.value,
       monthlyHours: form.monthlyHours.value ? Number(form.monthlyHours.value) : null,
       allowedShiftTypes: shiftTypes,
+      workingDays: workingDays.length > 0 ? workingDays : [0,1,2,3,4,5,6],
       active: true,
     };
 
